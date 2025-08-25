@@ -1,0 +1,10 @@
+# build.zig
+zig-out/
+.zig-cache/
+
+# CMake
+build/
+
+# clangd
+compile_commands.json
+.cache/
