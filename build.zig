@@ -40,8 +40,10 @@ pub fn build(b: *std.Build) void {
 
     const tests = b.addExecutable(.{
         .name = "tests",
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.addModule("tests", .{
+            .target = target,
+            .optimize = optimize,
+        }),
     });
 
     tests.addCSourceFiles(.{
