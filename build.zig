@@ -8,8 +8,6 @@ const cpp_flags: []const []const u8 = &.{
     "-pedantic",
 };
 
-var artifacts: [2]*std.Build.Step.Compile = undefined;
-
 pub fn build(b: *std.Build) void {
     defer _ = @import("cdb").addStep(b, "cdb");
 
