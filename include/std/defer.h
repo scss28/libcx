@@ -1,14 +1,11 @@
-template <typename F>
-class DeferFinalizer {
-    F fn;
+template <typename Fn>
+struct DeferFinalizer {
+    Fn fn;
     bool moved;
 
-   public:
     template <typename T>
     DeferFinalizer(T f) : fn(f), moved(false) {}
-
     DeferFinalizer(const DeferFinalizer &) = delete;
-
     DeferFinalizer(DeferFinalizer &&other)
         : fn(other.fn), moved(other.moved) {
         other.moved = true;
@@ -20,9 +17,9 @@ class DeferFinalizer {
 };
 
 struct Deferrer {
-    template <typename F>
-    DeferFinalizer<F> operator<<(F &&f) {
-        return DeferFinalizer<F>(f);
+    template <typename Fn>
+    DeferFinalizer<Fn> operator<<(Fn &&f) {
+        return DeferFinalizer<Fn>(f);
     }
 };
 

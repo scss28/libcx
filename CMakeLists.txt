@@ -20,6 +20,8 @@ target_include_directories(libcx
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+target_compile_options(libcx PRIVATE -nostdlib++)
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     target_compile_options(libcx PRIVATE 
         -Wall 

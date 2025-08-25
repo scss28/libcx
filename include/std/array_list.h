@@ -9,7 +9,7 @@ namespace std {
         Buf<T> items;
         usize capacity = 0;
 
-        void deinit(Allocator* allocator = &cAllocator) {
+        void deinit(Allocator allocator = cAllocator) {
             items.len = capacity;
             free(items, allocator);
 
