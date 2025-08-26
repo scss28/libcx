@@ -14,9 +14,17 @@ namespace std {
         Page* page;
 
         Arena();
+        Arena(usize capacity);
         Arena(Allocator allocator);
 
+        /// Get the Allocator of this arena 
         Allocator allocator();
+
+        /// Get the amount of bytes allocated using this arena 
+        /// (not the internal buffers' size).
+        usize allocation();
+
+        /// Free the internal buffers. Invalidates the arena.
         void deinit();
     };
 }

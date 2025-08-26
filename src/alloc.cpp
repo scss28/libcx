@@ -3,18 +3,18 @@
 
 namespace std {
     struct CAllocatorVTable {
-        static Buf<u8> alloc(void*, usize len, usize alignment) {
+        static Slice<u8> alloc(void*, usize len, usize alignment) {
             u8* ptr = (u8*)_aligned_malloc(len, alignment); 
             return { ptr, len };
         }
 
-        static void realloc(void*, Buf<u8>* buf, usize newLen, usize alignment) {
-            buf->ptr = (u8*)_aligned_realloc(buf->ptr, newLen, alignment);
-            buf->len = newLen;
+        static Slice<u8> realloc(void*, Slice<u8> slice, usize newLen, usize alignment) {
+            auto ptr = (u8*)_aligned_realloc(slice.ptr, newLen, alignment);
+            return { ptr, newLen };
         }
 
-        static void free(void*, Buf<u8> buf) {
-            ::_aligned_free(buf.ptr);
+        static void free(void*, Slice<u8> slice) {
+            ::_aligned_free(slice.ptr);
         }
     };
 

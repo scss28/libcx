@@ -50,6 +50,8 @@ pub fn build(b: *std.Build) void {
         .files = &.{
             "tests/arena.cpp",
             "tests/alloc.cpp",
+            "tests/mem.cpp",
+            "tests/array_list.cpp",
         },
         .flags = cpp_flags ++ .{ "-include", "tests/pch.h" },
     });

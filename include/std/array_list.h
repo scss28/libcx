@@ -6,21 +6,22 @@
 namespace std {
     template <typename T>
     struct ArrayList {
-        Buf<T> items;
+        Slice<T> items;
         usize capacity = 0;
 
+        /// Free all allocated memory. Invalidates this `ArrayList`.
         void deinit(Allocator allocator = cAllocator) {
             items.len = capacity;
-            free(items, allocator);
+            allocator.free(items);
 
-            std::setZeros(this);
+            *this = {0};
         }
 
         void resize(usize newCapacity, Allocator allocator = cAllocator) {
             capacity = newCapacity;
 
             usize oldItemsLen = items.len;
-            realloc<T>(&items, capacity, allocator);
+            items = allocator.realloc(items, capacity);
             items.len = oldItemsLen;
         }
 
@@ -33,11 +34,11 @@ namespace std {
                 if (newCapacity >= atLeast) break;
             }
 
-            resize(newCapacity);
+            resize(newCapacity, allocator);
         }
 
-        void ensureUnusedCapacity(usize atLeast, Allocator allocator = cAllocator) {
-            ensureCapacity(items.len + atLeast);
+        inline void ensureUnusedCapacity(usize atLeast, Allocator allocator = cAllocator) {
+            ensureCapacity(items.len + atLeast, allocator);
         }
 
         void push(T value, Allocator allocator = cAllocator) {
@@ -49,12 +50,12 @@ namespace std {
             items[items.len - 1] = value;
         }
 
-        void pushMany(Slice<T> slice) {
+        void pushMany(Slice<const T> slice) {
             if (slice.len == 0) return;
             ensureUnusedCapacity(slice.len);
 
             items.len += slice.len;
-            std::memcpy(items[items.len - slice.len, items.len], slice);
+            memcpy(items[items.len - slice.len, items.len], slice);
         }
 
         T pop() {
@@ -62,6 +63,10 @@ namespace std {
 
             defer { items.len -= 1; };
             return items[items.len - 1];
+        }
+
+        inline void clear() {
+            items.len = 0;
         }
     };
 }

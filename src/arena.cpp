@@ -1,17 +1,7 @@
 #include "std/arena.h"
+#include "std/mem.h"
 
 namespace std {
-    Arena::Arena() : Arena(cAllocator) {}
-    Arena::Arena(Allocator allocator) : parentAllocator(allocator), page(nullptr) {}
-
-    void Arena::deinit() {
-        while (page != nullptr) {
-            Arena::Page* previous = page->previous;
-            parentAllocator.free<u8>({(u8*)page, page->capacity + sizeof(usize) * 3});
-            page = previous;
-        }
-    }
-
     Arena::Page* allocateNewPage(
         Arena::Page* previous, 
         Allocator allocator,
@@ -28,8 +18,25 @@ namespace std {
         return page;
     }
 
+    Arena::Arena() : Arena(cAllocator) {}
+    Arena::Arena(usize capacity) : Arena() {
+        page = allocateNewPage(nullptr, parentAllocator, capacity);
+    }
+
+    Arena::Arena(Allocator allocator) : parentAllocator(allocator), page(nullptr) {}
+
+    void Arena::deinit() {
+        while (page != nullptr) {
+            Arena::Page* previous = page->previous;
+            parentAllocator.free<u8>({(u8*)page, page->capacity + sizeof(usize) * 3});
+            page = previous;
+        }
+
+        *this = {0};
+    }
+
     struct ArenaVTable {
-        static Buf<u8> alloc(void* p, usize len, usize alignment) {
+        static Slice<u8> alloc(void* p, usize len, usize alignment) {
             Arena* arena = (Arena*)p;
             if (arena->page == nullptr) {
                 arena->page = allocateNewPage(
@@ -39,9 +46,7 @@ namespace std {
                 );
             }
 
-            u8* ptr = &arena->page->bytes + arena->page->len;
-            ptr += alignment - ((usize)ptr % alignment);
-
+            u8* ptr = alignForward(&arena->page->bytes + arena->page->len, alignment);
             u8* end = &arena->page->bytes + arena->page->capacity;
             if (ptr + len > end) {
                 arena->page = allocateNewPage(
@@ -56,33 +61,30 @@ namespace std {
             return {ptr, len};
         }
 
-        static void realloc(void* p, Buf<u8>* buf, usize newLen, usize alignment) {
+        static Slice<u8> realloc(void* p, Slice<u8> slice, usize newLen, usize alignment) {
             Arena* arena = (Arena*)p;
             if (arena->page != nullptr) {
                 if (
-                    &arena->page->bytes + arena->page->len - buf->len == buf->ptr
-                    && buf->ptr + newLen <= &arena->page->bytes + arena->page->capacity
+                    &arena->page->bytes + arena->page->len - slice.len == slice.ptr
+                    && slice.ptr + newLen <= &arena->page->bytes + arena->page->capacity
                 ) {
-                    *buf = {buf->ptr, newLen};
-                    return;
+                    return {slice.ptr, newLen};
                 }
             }
 
-            *buf = alloc(p, newLen, alignment);
+            return alloc(p, newLen, alignment);
         }
 
-        static void free(void* p, Buf<u8> buf) {
+        static void free(void* p, Slice<u8> slice) {
             Arena* arena = (Arena*)p;
             if (arena->page == nullptr) return;
 
-            // Free can only happen if 'buf' is the last allocated thing.
-            if (&arena->page->bytes + arena->page->len - buf.len == buf.ptr) {
-                arena->page->len -= buf.len;
+            // Free can only happen if 'slice' is the last allocated thing.
+            if (&arena->page->bytes + arena->page->len - slice.len == slice.ptr) {
+                arena->page->len -= slice.len;
             }
         }
     };
-
-
 
     Allocator Arena::allocator() {
         return {
@@ -91,5 +93,20 @@ namespace std {
             .reallocFn = &ArenaVTable::realloc,
             .freeFn = &ArenaVTable::free,
         };
+    }
+
+    usize Arena::allocation() {
+        usize count = 0;
+        if (page != nullptr) {
+            count += page->len;
+            
+            Arena::Page* currentPage = page->previous;
+            while (currentPage != nullptr) {
+                count += currentPage->capacity;
+                currentPage = currentPage->previous;
+            }
+        }
+
+        return count;
     }
 }

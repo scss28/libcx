@@ -3,8 +3,8 @@ Minimalistic template library for C++ with no dependencies. It's meant to be use
 
 The library is knowingly written without the use of some C++ features to reduce complexity and make it easier to use.
 ## Features
-#### Slices and buffers
-`std::Slice` represents a readonly view into a "slice" of memory, on the inside it's just a pointer and length. `std::Buf` is like a slice but you're allowed to modify the sliced memory.
+#### Slices
+`std::Slice` represents a readonly view into a "slice" of memory, on the inside it's just a pointer and length. A lot of functions in the library deal with this struct. 
 #### Arrays and lists
 - **Array**
     ```C++
@@ -22,7 +22,7 @@ The library is knowingly written without the use of some C++ features to reduce 
     list.push(1);
     list.push(2);
 
-    // 'items' is the current 'std::Buf' of pushed items.
+    // 'items' is the current 'std::Slice' of pushed items.
     for (auto x : list.items) {
         std::log("%d\n", x);
     }
@@ -38,7 +38,7 @@ The library is knowingly written without the use of some C++ features to reduce 
     
     std::Arena arena;
 
-    // Allocates a buffer of 20 bytes. 
+    // Allocates a slice of 20 bytes. 
     // No need to free it as the arena frees all the owned memory in 'deinit'.
     auto buf = arena.allocator().alloc<u8>(20);
 

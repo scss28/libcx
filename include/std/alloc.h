@@ -1,11 +1,12 @@
 #pragma once
 #include "std/slice.h"
+#include "std/mem.h"
 
 namespace std {
     struct Allocator {
-        using Alloc = Buf<u8>(*)(void*, usize len, usize alignment);
-        using Realloc = void(*)(void*, Buf<u8>* buf, usize len, usize alignment);
-        using Free = void(*)(void*, Buf<u8> buf);
+        using Alloc = Slice<u8>(*)(void*, usize len, usize alignment);
+        using Realloc = Slice<u8>(*)(void*, Slice<u8> slice, usize len, usize alignment);
+        using Free = void(*)(void*, Slice<u8> slice);
 
         void* ptr;
         Alloc allocFn;
@@ -13,39 +14,42 @@ namespace std {
         Free freeFn;
 
         template <typename T>
-        Buf<T> alloc(
+        Slice<T> alloc(
             usize len,
             usize alignment = alignof(T)
         ) {
+            isValidAlignment(alignment);
+
             auto bytes = allocFn(ptr, len * sizeof(T), alignment); 
             return { (T*)bytes.ptr, len };
         }
 
         template <typename T>
-        void realloc(
-            Buf<T>* buf,
+        Slice<T> realloc(
+            Slice<T> slice,
             usize newLen,
             usize alignment = alignof(T)
         ) {
-            if (buf->len == 0) {
-                *buf = alloc<T>(newLen, alignment);
-                return;
+            isValidAlignment(alignment);
+
+            if (slice.len == 0) {
+                return alloc<T>(newLen, alignment);
             }
 
-            buf->ptr = (T*)reallocFn(buf, newLen * sizeof(T), alignment).ptr;
-            buf->len = newLen;
+            auto bytes = reallocFn(ptr, slice, newLen * sizeof(T), alignment);
+            return { (T*)bytes.ptr, newLen };
         }
 
         template <typename T>
-        void free(Buf<T> buf) {
-            freeFn(ptr, {(u8*)buf.ptr, buf.len * sizeof(T)});
+        void free(Slice<T> slice) {
+            freeFn(ptr, {(u8*)slice.ptr, slice.len * sizeof(T)});
         }
     };
 
     extern Allocator cAllocator;
 
     template <typename T>
-    inline Buf<T> alloc(
+    inline Slice<T> alloc(
         usize len,
         usize alignment = alignof(T)
     ) {
@@ -53,16 +57,16 @@ namespace std {
     }
 
     template <typename T>
-    inline void realloc(
-        Buf<T>* buf,
+    inline Slice<T> realloc(
+        Slice<T> slice,
         usize newLen,
         usize alignment = alignof(T)
     ) {
-        cAllocator.realloc(buf, newLen, alignment);
+        return cAllocator.realloc(slice, newLen, alignment);
     }
 
     template <typename T>
-    inline void free(Buf<T> buf) {
-        cAllocator.free(buf);
+    inline void free(Slice<T> slice) {
+        cAllocator.free(slice);
     }
 }
