@@ -52,6 +52,8 @@ FetchContent_MakeAvailable(catch2)
 set(libcxTestsSources
     tests/arena.cpp
     tests/alloc.cpp
+    tests/mem.cpp
+    tests/array_list.cpp
 )
 
 add_executable(libcxTests ${libcxTestsSources})
