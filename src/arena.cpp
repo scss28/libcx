@@ -35,63 +35,61 @@ namespace std {
         *this = {0};
     }
 
-    struct ArenaVTable {
-        static Slice<u8> alloc(void* p, usize len, usize alignment) {
-            Arena* arena = (Arena*)p;
-            if (arena->page == nullptr) {
-                arena->page = allocateNewPage(
-                    nullptr, 
-                    arena->parentAllocator, 
-                    4096 - sizeof(usize) * 3
-                );
-            }
-
-            u8* ptr = alignForward(&arena->page->bytes + arena->page->len, alignment);
-            u8* end = &arena->page->bytes + arena->page->capacity;
-            if (ptr + len > end) {
-                arena->page = allocateNewPage(
-                    arena->page, 
-                    arena->parentAllocator, 
-                    len > arena->page->capacity ? len : arena->page->capacity
-                );
-                ptr = &arena->page->bytes;
-            }
-
-            arena->page->len = (ptr - &arena->page->bytes) + len;
-            return {ptr, len};
+    Slice<u8> arenaAlloc(void* p, usize len, usize alignment) {
+        Arena* arena = (Arena*)p;
+        if (arena->page == nullptr) {
+            arena->page = allocateNewPage(
+                nullptr, 
+                arena->parentAllocator, 
+                4096 - sizeof(usize) * 3
+            );
         }
 
-        static Slice<u8> realloc(void* p, Slice<u8> slice, usize newLen, usize alignment) {
-            Arena* arena = (Arena*)p;
-            if (arena->page != nullptr) {
-                if (
-                    &arena->page->bytes + arena->page->len - slice.len == slice.ptr
-                    && slice.ptr + newLen <= &arena->page->bytes + arena->page->capacity
-                ) {
-                    return {slice.ptr, newLen};
-                }
-            }
-
-            return alloc(p, newLen, alignment);
+        u8* ptr = alignForward(&arena->page->bytes + arena->page->len, alignment);
+        u8* end = &arena->page->bytes + arena->page->capacity;
+        if (ptr + len > end) {
+            arena->page = allocateNewPage(
+                arena->page, 
+                arena->parentAllocator, 
+                len > arena->page->capacity ? len : arena->page->capacity
+            );
+            ptr = &arena->page->bytes;
         }
 
-        static void free(void* p, Slice<u8> slice) {
-            Arena* arena = (Arena*)p;
-            if (arena->page == nullptr) return;
+        arena->page->len = (ptr - &arena->page->bytes) + len;
+        return {ptr, len};
+    }
 
-            // Free can only happen if 'slice' is the last allocated thing.
-            if (&arena->page->bytes + arena->page->len - slice.len == slice.ptr) {
-                arena->page->len -= slice.len;
+    Slice<u8> arenaRealloc(void* p, Slice<u8> slice, usize newLen, usize alignment) {
+        Arena* arena = (Arena*)p;
+        if (arena->page != nullptr) {
+            if (
+                &arena->page->bytes + arena->page->len - slice.len == slice.ptr
+                && slice.ptr + newLen <= &arena->page->bytes + arena->page->capacity
+            ) {
+                return {slice.ptr, newLen};
             }
         }
-    };
+
+        return arenaAlloc(p, newLen, alignment);
+    }
+
+    void arenaFree(void* p, Slice<u8> slice) {
+        Arena* arena = (Arena*)p;
+        if (arena->page == nullptr) return;
+
+        // Free can only happen if 'slice' is the last allocated thing.
+        if (&arena->page->bytes + arena->page->len - slice.len == slice.ptr) {
+            arena->page->len -= slice.len;
+        }
+    }
 
     Allocator Arena::allocator() {
         return {
             .ptr = this,
-            .allocFn = &ArenaVTable::alloc,
-            .reallocFn = &ArenaVTable::realloc,
-            .freeFn = &ArenaVTable::free,
+            .allocFn = &arenaAlloc,
+            .reallocFn = &arenaRealloc,
+            .freeFn = &arenaFree,
         };
     }
 
