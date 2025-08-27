@@ -1,8 +1,8 @@
 #pragma once
-#include "std/slice.h"
-#include "std/mem.h"
+#include "cx/slice.h"
+#include "cx/mem.h"
 
-namespace std {
+namespace cx::mem {
     struct Allocator {
         using Alloc = Slice<u8>(*)(void*, usize len, usize alignment);
         using Realloc = Slice<u8>(*)(void*, Slice<u8> slice, usize len, usize alignment);

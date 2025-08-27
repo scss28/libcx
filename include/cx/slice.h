@@ -1,8 +1,8 @@
 #pragma once
-#include "std/nums.h"
+#include "cx/nums.h"
 #include <assert.h>
 
-namespace std {
+namespace cx {
     template <typename T>
     struct Slice {
         T* ptr = nullptr; 

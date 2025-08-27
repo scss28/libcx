@@ -4,39 +4,41 @@ Minimalistic template library for C++ with no dependencies. It's meant to be use
 The library is knowingly written without the use of some C++ features to reduce complexity and make it easier to use.
 ## Features
 #### Slices
-`std::Slice` represents a readonly view into a "slice" of memory, on the inside it's just a pointer and length. A lot of functions in the library deal with this struct. 
+`cx::Slice` represents a readonly view into a "slice" of memory, on the inside it's just a pointer and length. A lot of functions in the library deal with this struct. 
 #### Arrays and lists
 - **Array**
     ```C++
-    #include <std/array.h>
+    #include <cx/array.h>
 
     // Very similar to std::array from STL, owns the memory and has static size.
-    auto arr = std::arr<u32>(1, 2);
+    auto arr = cx::arr<u32>(1, 2);
     ```
 - **ArrayList**
     ```C++
-    #include <std/array_list.h>
-    #include <std/log.h>
+    #include <cx/array_list.h>
+    #include <cx/log.h>
 
-    std::ArrayList<i32> list;
+    namespace log = cx::log;
+
+    cx::ArrayList<i32> list;
     list.push(1);
     list.push(2);
 
     // 'items' is the current 'std::Slice' of pushed items.
     for (auto x : list.items) {
-        std::log("%d\n", x);
+        log::print("%d\n", x);
     }
     ```
 
 #### Allocators
-`std::Allocator` in the beginning was meant to be a normal C++ interface with pure virtual functions however since the library doesn't link `libcpp` the current `std::Allocator` is a C-style vtable struct.
+`cx::mem::Allocator` in the beginning was meant to be a normal C++ interface with pure virtual functions however since the library doesn't link `libcpp` the current `cx::mem::Allocator` is a C-style vtable struct.
 - **cAllocator** (global) \
-    Its the default allocator used when using `std::alloc`, `std::realloc` and `std::free`. It's meant for general use like `malloc`/`free`.
+    Its the default allocator used when using `cx::mem::alloc`, `cx::mem::realloc` and `cx::mem::free`. It's meant for general use like `malloc`/`free`.
 - **Arena**
     ```C++
-    #include <std/arena.h>
+    #include <cx/arena.h>
     
-    std::Arena arena;
+    cx::Arena arena;
 
     // Allocates a slice of 20 bytes. 
     // No need to free it as the arena frees all the owned memory in 'deinit'.

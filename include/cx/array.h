@@ -1,10 +1,11 @@
 #pragma once
-#include "std/nums.h"
-#include "std/mem.h"
+#include "cx/nums.h"
+#include "cx/slice.h"
+#include "cx/mem.h"
 
 #include <assert.h>
 
-namespace std {
+namespace cx {
     template <typename T, usize N>
     struct Array {
         T data[N];
@@ -18,10 +19,6 @@ namespace std {
             for (usize i = 0; i < N; i++) data[i] = d[i];
         }
 
-        Buf<T> buf() {
-            return {data, N};
-        }
-
         constexpr usize len() {
             return N;
         }
@@ -31,7 +28,7 @@ namespace std {
             return data[index];
         }
 
-        inline Buf<T> operator[](usize start, usize end) const {
+        inline Slice<T> operator[](usize start, usize end) const {
             assert(end >= start);
             assert(end <= N);
             return { data + start, end - start };

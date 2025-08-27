@@ -1,12 +1,14 @@
 #pragma once
-#include "std/slice.h"
-#include "assert.h"
+#include "cx/slice.h"
 
-namespace std {
+#include <assert.h>
+#include <string.h>
+
+namespace cx::mem {
     template <typename T>
     void memcpy(Slice<T> dst, Slice<const T> src) {
         assert(src.len == dst.len);
-        memcpy(dst.ptr, src.ptr, dst.len * sizeof(T));
+        ::memcpy(dst.ptr, src.ptr, dst.len * sizeof(T));
     }
 
     template <typename T>
@@ -50,5 +52,13 @@ namespace std {
     template <typename T>
     inline T* alignForward(T* ptr, usize alignment) {
         return alignBackward(ptr + (alignment - 1), alignment);
+    }
+
+    template <typename T, typename U>
+    T bitCast(U value) {
+        T out;
+        ::memcpy(&out, &value, sizeof(T));
+
+        return out;
     }
 }

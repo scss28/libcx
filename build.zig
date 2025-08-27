@@ -14,59 +14,80 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const mod = b.addModule("libcx", .{
+    const libcx_mod = b.addModule("libcx", .{
         .target = target,
         .optimize = optimize,
         .link_libc = true,
     });
 
-    mod.addCSourceFiles(.{
-        .files = &.{
-            "src/alloc.cpp",
-            "src/arena.cpp",
+    var libcxSourceFiles: std.ArrayListUnmanaged([]const u8) = .empty;
+    libcxSourceFiles.appendSlice(b.allocator, &.{
+        "src/alloc.cpp",
+        "src/arena.cpp",
+        "src/math.cpp",
+    }) catch @panic("OOM");
+
+    switch (target.result.os.tag) {
+        .windows => {
+            libcxSourceFiles.appendSlice(b.allocator, &.{
+                "src/windows/time.cpp",
+                "src/windows/thread.cpp",
+            }) catch @panic("OOM");
         },
+        .linux => {
+            @panic("TODO");
+        },
+        else => @panic("Unsupported OS"),
+    }
+
+    libcx_mod.addCSourceFiles(.{
+        .files = libcxSourceFiles.items,
         .flags = cpp_flags ++ .{
             "-fno-exceptions",
             "-fno-rtti",
         },
     });
-    mod.addIncludePath(b.path("src"));
-    mod.addIncludePath(b.path("include"));
+    libcx_mod.addIncludePath(b.path("src"));
+    libcx_mod.addIncludePath(b.path("include"));
 
-    const lib = b.addLibrary(.{ .name = "libcx", .root_module = mod });
-    lib.installHeadersDirectory(b.path("include/std"), "std", .{});
+    const libcx = b.addLibrary(.{ .name = "libcx", .root_module = libcx_mod });
+    libcx.installHeadersDirectory(b.path("include/cx"), "cx", .{});
 
-    b.installArtifact(lib);
+    b.installArtifact(libcx);
 
-    const tests = b.addExecutable(.{
-        .name = "tests",
-        .root_module = b.addModule("tests", .{
+    const libcx_tests = b.addExecutable(.{
+        .name = "libcx_tests",
+        .root_module = b.addModule("libcx_tests", .{
             .target = target,
             .optimize = optimize,
         }),
     });
 
-    tests.addCSourceFiles(.{
+    libcx_tests.addCSourceFiles(.{
         .files = &.{
             "tests/arena.cpp",
             "tests/alloc.cpp",
             "tests/mem.cpp",
             "tests/array_list.cpp",
+            "tests/time.cpp",
         },
-        .flags = cpp_flags ++ .{ "-include", "tests/pch.h" },
+        .flags = cpp_flags ++ .{ 
+            "-include", 
+           "tests/pch.h",
+       },
     });
-    tests.linkLibrary(lib);
+    libcx_tests.linkLibrary(libcx);
 
     const catch2 = b.lazyDependency("catch2", .{
         .target = target,
         .optimize = optimize,
     }) orelse return;
-    tests.linkLibrary(catch2.artifact("Catch2"));
-    tests.linkLibrary(catch2.artifact("Catch2WithMain"));
+    libcx_tests.linkLibrary(catch2.artifact("Catch2"));
+    libcx_tests.linkLibrary(catch2.artifact("Catch2WithMain"));
 
-    b.installArtifact(tests);
+    b.installArtifact(libcx_tests);
 
-    const run_tests = b.addRunArtifact(tests);
+    const run_tests = b.addRunArtifact(libcx_tests);
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_tests.step);

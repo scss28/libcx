@@ -18,6 +18,10 @@ using isize = intptr_t;
 using usize = uintptr_t;
 
 #if defined(__GNUC__) || defined (__clang__)
+#define INT128
+#endif
+
+#ifdef INT128
 using i128 = __int128;
 using u128 = unsigned __int128;
 #endif

@@ -1,23 +1,23 @@
-#include "std/slice.h"
-#include "std/alloc.h"
-#include "std/defer.h"
-#include "std/mem.h"
+#include "cx/slice.h"
+#include "cx/alloc.h"
+#include "cx/defer.h"
+#include "cx/mem.h"
 
-namespace std {
+namespace cx {
     template <typename T>
     struct ArrayList {
         Slice<T> items;
         usize capacity = 0;
 
         /// Free all allocated memory. Invalidates this `ArrayList`.
-        void deinit(Allocator allocator = cAllocator) {
+        void deinit(mem::Allocator allocator = mem::cAllocator) {
             items.len = capacity;
             allocator.free(items);
 
             *this = {0};
         }
 
-        void resize(usize newCapacity, Allocator allocator = cAllocator) {
+        void resize(usize newCapacity, mem::Allocator allocator = mem::cAllocator) {
             capacity = newCapacity;
 
             usize oldItemsLen = items.len;
@@ -25,7 +25,7 @@ namespace std {
             items.len = oldItemsLen;
         }
 
-        void ensureCapacity(usize atLeast, Allocator allocator = cAllocator) {
+        void ensureCapacity(usize atLeast, mem::Allocator allocator = mem::cAllocator) {
             if (atLeast <= capacity) return;
             
             usize newCapacity = capacity;
@@ -37,11 +37,14 @@ namespace std {
             resize(newCapacity, allocator);
         }
 
-        inline void ensureUnusedCapacity(usize atLeast, Allocator allocator = cAllocator) {
+        inline void ensureUnusedCapacity(
+            usize atLeast, 
+            mem::Allocator allocator = mem::cAllocator
+        ) {
             ensureCapacity(items.len + atLeast, allocator);
         }
 
-        void push(T value, Allocator allocator = cAllocator) {
+        void push(T value, mem::Allocator allocator = mem::cAllocator) {
             if (capacity == items.len) {
                 resize((capacity + 1) * 2, allocator);
             }

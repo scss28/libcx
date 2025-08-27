@@ -1,10 +1,10 @@
-#include "std/nums.h"
+#include "cx/nums.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-namespace std {
+namespace cx::log {
     template <class... Args>
-    void log(u8 const*__restrict fmt, Args&&... args) {
+    void print(u8 const*__restrict fmt, Args&&... args) {
         // printf(fmt, args...);
         // printf("\n");
     }

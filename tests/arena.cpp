@@ -1,8 +1,8 @@
-#include <std/arena.h>
-#include <std/defer.h>
+#include <cx/arena.h>
+#include <cx/defer.h>
 
 TEST_CASE("Arena should allocate with correct alignment", "[arena]") {
-    std::Arena arena;
+    cx::Arena arena;
     defer { arena.deinit(); };
 
     auto allocator = arena.allocator();
@@ -17,7 +17,7 @@ TEST_CASE("Arena should allocate with correct alignment", "[arena]") {
 }
 
 TEST_CASE("Arena should free the last allocated buffer", "[arena]") {
-    std::Arena arena;
+    cx::Arena arena;
     defer { arena.deinit(); };
 
     auto allocator = arena.allocator();
@@ -29,7 +29,7 @@ TEST_CASE("Arena should free the last allocated buffer", "[arena]") {
 }
 
 TEST_CASE("Arena should resize the last allocated buffer", "[arena]") {
-    std::Arena arena(20);
+    cx::Arena arena(20);
     defer { arena.deinit(); };
 
     auto allocator = arena.allocator();

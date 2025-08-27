@@ -1,6 +1,7 @@
+#include "cx/nums.h"
 #include <math.h>
 
-namespace std {
+namespace cx::math {
     template <typename T>
     inline T min(T a, T b) {
         return a < b ? a : b;
@@ -25,4 +26,10 @@ namespace std {
     inline T cos(T x) {
         return ::cos(x);
     }
+
+    template <typename T>
+    constexpr T minInt();
+
+    template <typename T>
+    constexpr T maxInt();
 }

@@ -1,7 +1,7 @@
-#include <std/array_list.h>
+#include <cx/array_list.h>
 
 TEST_CASE("ArrayList 'push' works", "[array_list]") {
-    std::ArrayList<u8> list;
+    cx::ArrayList<u8> list;
     list.push(1);
     list.push(2);
 
@@ -11,7 +11,7 @@ TEST_CASE("ArrayList 'push' works", "[array_list]") {
 }
 
 TEST_CASE("ArrayList 'pop' works", "[array_list]") {
-    std::ArrayList<u8> list;
+    cx::ArrayList<u8> list;
     list.push(1);
     auto popped = list.pop();
 

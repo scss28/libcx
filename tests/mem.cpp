@@ -1,8 +1,10 @@
-#include <std/mem.h>
+#include <cx/mem.h>
+
+namespace mem = cx::mem;
 
 TEST_CASE("isValidAlignment checks alignment properly", "[mem]") {
-    REQUIRE(std::isValidAlignment(2) == true);
-    REQUIRE(std::isValidAlignment(3) == false);
-    REQUIRE(std::isValidAlignment(0) == false);
-    REQUIRE(std::isValidAlignment(512) == true);
+    REQUIRE(mem::isValidAlignment(2) == true);
+    REQUIRE(mem::isValidAlignment(3) == false);
+    REQUIRE(mem::isValidAlignment(0) == false);
+    REQUIRE(mem::isValidAlignment(512) == true);
 }

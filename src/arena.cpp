@@ -1,10 +1,10 @@
-#include "std/arena.h"
-#include "std/mem.h"
+#include "cx/arena.h"
+#include "cx/mem.h"
 
-namespace std {
+namespace cx {
     Arena::Page* allocateNewPage(
         Arena::Page* previous, 
-        Allocator allocator,
+        mem::Allocator allocator,
         usize capacity
     ) {
         Arena::Page* page = (Arena::Page*)allocator.alloc<u8>(
@@ -18,12 +18,12 @@ namespace std {
         return page;
     }
 
-    Arena::Arena() : Arena(cAllocator) {}
+    Arena::Arena() : Arena(mem::cAllocator) {}
     Arena::Arena(usize capacity) : Arena() {
         page = allocateNewPage(nullptr, parentAllocator, capacity);
     }
 
-    Arena::Arena(Allocator allocator) : parentAllocator(allocator), page(nullptr) {}
+    Arena::Arena(mem::Allocator allocator) : parentAllocator(allocator), page(nullptr) {}
 
     void Arena::deinit() {
         while (page != nullptr) {
@@ -45,7 +45,7 @@ namespace std {
             );
         }
 
-        u8* ptr = alignForward(&arena->page->bytes + arena->page->len, alignment);
+        u8* ptr = mem::alignForward(&arena->page->bytes + arena->page->len, alignment);
         u8* end = &arena->page->bytes + arena->page->capacity;
         if (ptr + len > end) {
             arena->page = allocateNewPage(
@@ -84,7 +84,7 @@ namespace std {
         }
     }
 
-    Allocator Arena::allocator() {
+    mem::Allocator Arena::allocator() {
         return {
             .ptr = this,
             .allocFn = &arenaAlloc,

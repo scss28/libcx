@@ -1,7 +1,7 @@
-#include "std/alloc.h"
+#include "cx/alloc.h"
 #include <stdlib.h>
 
-namespace std {
+namespace cx::mem {
     static Slice<u8> cAlloc(void*, usize len, usize alignment) {
         u8* ptr = (u8*)_aligned_malloc(len, alignment); 
         assert(ptr != nullptr);

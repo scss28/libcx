@@ -1,7 +1,7 @@
 #pragma once
-#include "std/alloc.h"
+#include "cx/alloc.h"
 
-namespace std {
+namespace cx {
     struct Arena {
         struct Page {
             Page* previous;
@@ -10,15 +10,15 @@ namespace std {
             u8 bytes;
         };
 
-        Allocator parentAllocator;
+        mem::Allocator parentAllocator;
         Page* page;
 
         Arena();
         Arena(usize capacity);
-        Arena(Allocator allocator);
+        Arena(mem::Allocator allocator);
 
         /// Get the Allocator of this arena 
-        Allocator allocator();
+        mem::Allocator allocator();
 
         /// Get the amount of bytes allocated using this arena 
         /// (not the internal buffers' size).
