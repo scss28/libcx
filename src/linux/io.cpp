@@ -1,17 +1,18 @@
 #include "cx/io.h"
+#include "cx/linux.h"
 #include "cx/mem.h"
 
 namespace cx::io {
     File stdin() {
-        return { .handle = (File::Handle)0 };
+        return { .handle = mem::bitCast<File::Handle>(linux::STDIN_FILENO) };
     }
 
     File stdout() {
-        return { .handle = (File::Handle)1 };
+        return { .handle = mem::bitCast<File::Handle>(linux::STDOUT_FILENO) };
     }
 
     File stderr() {
-        return { .handle = (File::Handle)2 };
+        return { .handle = mem::bitCast<File::Handle>(linux::STDERR_FILENO) };
     }
 
     Either<File, File::OpenError> Dir::openFile(Slice<const u8> path) {

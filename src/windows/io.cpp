@@ -6,15 +6,22 @@
 
 namespace cx::io {
     File stdin() {
-        return { .handle = (File::Handle)windows::peb()->ProcessParameters->hStdInput };
+        auto handle = 
+            mem::bitCast<File::Handle>(windows::peb()->ProcessParameters->hStdInput);
+
+        return { .handle = handle };
     }
     
     File stdout() {
-        return { .handle = (File::Handle)windows::peb()->ProcessParameters->hStdOutput };
+        auto handle = 
+            mem::bitCast<File::Handle>(windows::peb()->ProcessParameters->hStdOutput);
+        return { .handle = handle };
     }
 
     File stderr() {
-        return { .handle = (File::Handle)windows::peb()->ProcessParameters->hStdError };
+        auto handle = 
+            mem::bitCast<File::Handle>(windows::peb()->ProcessParameters->hStdError);
+        return { .handle = handle };
     }
 
     Either<File, File::OpenError> Dir::openFile(Slice<const u8> path) {

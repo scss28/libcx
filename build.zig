@@ -50,6 +50,12 @@ pub fn build(b: *std.Build) !void {
                 libcx_mod.linkSystemLibrary("dbghelp", .{});
             }
         },
+        .linux => {
+            try libcxSourceFiles.appendSlice(b.allocator, &.{
+                "linux/io.cpp",
+                "linux/io/file.cpp",
+            });
+        },
         else => @panic("Unsupported OS"),
     }
 
