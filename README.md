@@ -1,7 +1,6 @@
 # libcx
 Minimalistic template library for C++ with no dependencies. It's meant to be used as a replacement for the STL (mainly for myself).
 
-The library is knowingly written without the use of some C++ features to reduce complexity and make it easier to use.
 ## Features
 #### Slices
 `cx::Slice` represents a readonly view into a "slice" of memory, on the inside it's just a pointer and length. A lot of functions in the library deal with this struct. 
