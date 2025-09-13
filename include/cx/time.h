@@ -2,35 +2,34 @@
 #include "cx/nums.h"
 
 namespace cx::time {
-    struct Instant;
-    Instant now();
+    struct Instant {
+        u64 timestamp;
+
+        static Instant now();
+    };
+
     u64 between(Instant start, Instant end);
 
-    inline const u64 nsPerUs = 1000;
-    inline const u64 nsPerMs = 1000 * nsPerUs;
-    inline const u64 nsPerS = 1000 * nsPerMs;
-    inline const u64 nsPerMin = 60 * nsPerS;
-    inline const u64 nsPerH = 60 * nsPerMin;
-    inline const u64 nsPerDay = 24 * nsPerH;
+    inline const u64 NS_PER_US = 1000;
+    inline const u64 NS_PER_MS = 1000 * NS_PER_US;
+    inline const u64 NS_PER_S = 1000 * NS_PER_MS;
+    inline const u64 NS_PER_MIN = 60 * NS_PER_S;
+    inline const u64 NS_PER_H = 60 * NS_PER_MIN;
+    inline const u64 NS_PER_DAY = 24 * NS_PER_H;
     
-    inline const u64 usPerMs = 1000;
-    inline const u64 usPerS = 1000 * usPerMs;
-    inline const u64 usPerMin = 60 * usPerS;
-    inline const u64 usPerH = 60 * usPerMin;
-    inline const u64 usPerDay = 24 * usPerH;
+    inline const u64 US_PER_MS = 1000;
+    inline const u64 US_PER_S = 1000 * US_PER_MS;
+    inline const u64 US_PER_MIN = 60 * US_PER_S;
+    inline const u64 US_PER_H = 60 * US_PER_MIN;
+    inline const u64 US_PER_DAY = 24 * US_PER_H;
     
-    inline const u64 msPerS = 1000;
-    inline const u64 msPerMin = 60 * msPerS;
-    inline const u64 msPerH = 60 * msPerMin;
-    inline const u64 msPerDay = 24 * msPerH;
+    inline const u64 MS_PER_S = 1000;
+    inline const u64 MS_PER_MIN = 60 * MS_PER_S;
+    inline const u64 MS_PER_H = 60 * MS_PER_MIN;
+    inline const u64 MS_PER_DAY = 24 * MS_PER_H;
     
-    inline const u64 sPerMin = 60;
-    inline const u64 sPerH = 60 * sPerMin;
-    inline const u64 sPerDay = 24 * sPerH;
+    inline const u64 S_PER_MIN = 60;
+    inline const u64 S_PER_H = 60 * S_PER_MIN;
+    inline const u64 S_PER_DAY = 24 * S_PER_H;
 }
 
-#ifdef _WIN32
-#include "cx/windows/time.h"
-#elifdef __linux__ 
-#include "cx/linux/time.h"
-#endif

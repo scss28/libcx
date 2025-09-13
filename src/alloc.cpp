@@ -1,29 +1,29 @@
 #include "cx/alloc.h"
-#include <stdlib.h>
+#include <stdlib.h> // @libc
 
 namespace cx::mem {
-    static Slice<u8> cAlloc(void*, usize len, usize alignment) {
+    static Slice<u8> gpaAlloc(void*, usize len, usize alignment) {
         u8* ptr = (u8*)_aligned_malloc(len, alignment); 
-        assert(ptr != nullptr);
+        ASSERT(ptr != nullptr);
 
         return { ptr, len };
     }
 
-    static Slice<u8> cRealloc(void*, Slice<u8> slice, usize newLen, usize alignment) {
+    static Slice<u8> gpaRealloc(void*, Slice<u8> slice, usize newLen, usize alignment) {
         auto ptr = (u8*)_aligned_realloc(slice.ptr, newLen, alignment);
-        assert(ptr != nullptr);
+        ASSERT(ptr != nullptr);
 
         return { ptr, newLen };
     }
 
-    static void cFree(void*, Slice<u8> slice) {
+    static void gpaFree(void*, Slice<u8> slice) {
         ::_aligned_free(slice.ptr);
     }
 
-    Allocator cAllocator = {
+    Allocator gpa = {
         .ptr = nullptr,
-        .allocFn = &cAlloc,
-        .reallocFn = &cRealloc,
-        .freeFn = &cFree,
+        .allocFn = &gpaAlloc,
+        .reallocFn = &gpaRealloc,
+        .freeFn = &gpaFree,
     };
 }

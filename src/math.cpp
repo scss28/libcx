@@ -1,6 +1,31 @@
 #include "cx/math.h"
 
+#if defined(__GNUC__) || defined (__clang__)
+#define SIN32(x) __builtin_sinf(x)
+#define SIN64(x) __builtin_sin(x)
+#else
+#include <math.h>
+#define SIN32(x) ::sinf(x)
+#define SIN64(x) ::sin(x)
+#endif
+
 namespace cx::math {
+    f32 sin(f32 x) {
+        return SIN32(x);
+    }
+
+    f64 sin(f64 x) {
+        return SIN64(x);
+    }
+
+    f32 cos(f32 x) {
+        return sin(x + PI / 2.0f);
+    }
+
+    f64 cos(f64 x) {
+        return sin(x + PI / 2.0f);
+    }
+
     template <>
     constexpr u8 maxInt() {
         return 0xff;

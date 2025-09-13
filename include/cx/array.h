@@ -24,13 +24,13 @@ namespace cx {
         }
 
         inline T const& operator[](usize index) const {
-            assert(index < N);
+            ASSERT(index < N);
             return data[index];
         }
 
         inline Slice<T> operator[](usize start, usize end) const {
-            assert(end >= start);
-            assert(end <= N);
+            ASSERT(end >= start);
+            ASSERT(end <= N);
             return { data + start, end - start };
         }
 

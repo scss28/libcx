@@ -1,6 +1,7 @@
 #pragma once
+
 #include "cx/nums.h"
-#include <assert.h>
+#include "cx/assert.h"
 
 namespace cx {
     template <typename T>
@@ -26,18 +27,18 @@ namespace cx {
                 alignof(T) > alignof(U)
                 && alignof(U) % alignof(T) == 0 
             );
-            assert((slice.len * sizeof(U)) % sizeof(T) == 0);
+            ASSERT((slice.len * sizeof(U)) % sizeof(T) == 0);
             len = slice.len * sizeof(U) / sizeof(T);
         }
 
         inline T& operator[](usize index) const {
-            assert(index < len);
+            ASSERT(index < len);
             return ptr[index];
         }
 
         inline Slice<T> operator[](usize start, usize end) const {
-            assert(end >= start);
-            assert(end <= len);
+            ASSERT(end >= start);
+            ASSERT(end <= len);
             return { ptr + start, end - start };
         }
 

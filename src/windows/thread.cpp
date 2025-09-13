@@ -6,6 +6,6 @@
 
 namespace cx::thread {
     void sleep(u64 ns) {
-        Sleep(static_cast<DWORD>(ns / time::nsPerMs));
+        Sleep(static_cast<DWORD>(ns / time::NS_PER_MS));
     }
 }

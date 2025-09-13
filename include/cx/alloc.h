@@ -46,14 +46,14 @@ namespace cx::mem {
         }
     };
 
-    extern Allocator cAllocator;
+    extern Allocator gpa;
 
     template <typename T>
     inline Slice<T> alloc(
         usize len,
         usize alignment = alignof(T)
     ) {
-        return cAllocator.alloc<T>(len, alignment);
+        return gpa.alloc<T>(len, alignment);
     }
 
     template <typename T>
@@ -62,11 +62,11 @@ namespace cx::mem {
         usize newLen,
         usize alignment = alignof(T)
     ) {
-        return cAllocator.realloc(slice, newLen, alignment);
+        return gpa.realloc(slice, newLen, alignment);
     }
 
     template <typename T>
     inline void free(Slice<T> slice) {
-        cAllocator.free(slice);
+        gpa.free(slice);
     }
 }

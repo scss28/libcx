@@ -8,7 +8,7 @@ const cpp_flags: []const []const u8 = &.{
     "-pedantic",
 };
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) !void {
     defer _ = @import("cdb").addStep(b, "cdb");
 
     const target = b.standardTargetOptions(.{});
@@ -21,26 +21,40 @@ pub fn build(b: *std.Build) void {
     });
 
     var libcxSourceFiles: std.ArrayListUnmanaged([]const u8) = .empty;
-    libcxSourceFiles.appendSlice(b.allocator, &.{
-        "src/alloc.cpp",
-        "src/arena.cpp",
-        "src/math.cpp",
-    }) catch @panic("OOM");
+    try libcxSourceFiles.appendSlice(
+        b.allocator,
+        &.{
+            "alloc.cpp",
+            "arena.cpp",
+            "math.cpp",
+            "program.cpp",
+
+            "io.cpp",
+            "file.cpp",
+        },
+    );
 
     switch (target.result.os.tag) {
         .windows => {
-            libcxSourceFiles.appendSlice(b.allocator, &.{
-                "src/windows/time.cpp",
-                "src/windows/thread.cpp",
-            }) catch @panic("OOM");
-        },
-        .linux => {
-            @panic("TODO");
+            try libcxSourceFiles.appendSlice(b.allocator, &.{
+                "windows/time.cpp",
+                "windows/thread.cpp",
+                "windows/program.cpp",
+
+                "windows/io.cpp",
+                "windows/io/file.cpp",
+                "windows/io/dir.cpp",
+            });
+
+            if (optimize == .Debug) {
+                libcx_mod.linkSystemLibrary("dbghelp", .{});
+            }
         },
         else => @panic("Unsupported OS"),
     }
 
     libcx_mod.addCSourceFiles(.{
+        .root = b.path("src"),
         .files = libcxSourceFiles.items,
         .flags = cpp_flags ++ .{
             "-fno-exceptions",
@@ -64,17 +78,21 @@ pub fn build(b: *std.Build) void {
     });
 
     libcx_tests.addCSourceFiles(.{
+        .root = b.path("tests"),
         .files = &.{
-            "tests/arena.cpp",
-            "tests/alloc.cpp",
-            "tests/mem.cpp",
-            "tests/array_list.cpp",
-            "tests/time.cpp",
+            "arena.cpp",
+            "alloc.cpp",
+            "mem.cpp",
+            "array_list.cpp",
+            "time.cpp",
+            "math.cpp",
+            "either.cpp",
+            "io.cpp",
         },
-        .flags = cpp_flags ++ .{ 
-            "-include", 
-           "tests/pch.h",
-       },
+        .flags = cpp_flags ++ .{
+            "-include",
+            "tests/pch.h",
+        },
     });
     libcx_tests.linkLibrary(libcx);
 

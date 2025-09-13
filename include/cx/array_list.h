@@ -1,3 +1,5 @@
+#pragma once
+
 #include "cx/slice.h"
 #include "cx/alloc.h"
 #include "cx/defer.h"
@@ -10,14 +12,14 @@ namespace cx {
         usize capacity = 0;
 
         /// Free all allocated memory. Invalidates this `ArrayList`.
-        void deinit(mem::Allocator allocator = mem::cAllocator) {
+        void deinit(mem::Allocator allocator = mem::gpa) {
             items.len = capacity;
             allocator.free(items);
 
             *this = {0};
         }
 
-        void resize(usize newCapacity, mem::Allocator allocator = mem::cAllocator) {
+        void resize(usize newCapacity, mem::Allocator allocator = mem::gpa) {
             capacity = newCapacity;
 
             usize oldItemsLen = items.len;
@@ -25,7 +27,7 @@ namespace cx {
             items.len = oldItemsLen;
         }
 
-        void ensureCapacity(usize atLeast, mem::Allocator allocator = mem::cAllocator) {
+        void ensureCapacity(usize atLeast, mem::Allocator allocator = mem::gpa) {
             if (atLeast <= capacity) return;
             
             usize newCapacity = capacity;
@@ -39,12 +41,12 @@ namespace cx {
 
         inline void ensureUnusedCapacity(
             usize atLeast, 
-            mem::Allocator allocator = mem::cAllocator
+            mem::Allocator allocator = mem::gpa
         ) {
             ensureCapacity(items.len + atLeast, allocator);
         }
 
-        void push(T value, mem::Allocator allocator = mem::cAllocator) {
+        void push(T value, mem::Allocator allocator = mem::gpa) {
             if (capacity == items.len) {
                 resize((capacity + 1) * 2, allocator);
             }
@@ -62,7 +64,7 @@ namespace cx {
         }
 
         T pop() {
-            assert(items.len > 0);
+            ASSERT(items.len > 0);
 
             defer { items.len -= 1; };
             return items[items.len - 1];

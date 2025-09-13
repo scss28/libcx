@@ -1,7 +1,8 @@
 #include "cx/nums.h"
-#include <math.h>
 
 namespace cx::math {
+    inline const f32 PI = 3.14159265359f;
+
     template <typename T>
     inline T min(T a, T b) {
         return a < b ? a : b;
@@ -18,14 +19,20 @@ namespace cx::math {
     }
 
     template <typename T>
-    inline T sin(T x) {
-        return ::sin(x);
+    inline T lerp(T a, T b, f32 t) {
+        return a + (T)((b - a) * t);
     }
 
     template <typename T>
-    inline T cos(T x) {
-        return ::cos(x);
+    inline T lerp(T a, T b, f64 t) {
+        return a + (T)((b - a) * t);
     }
+
+    f32 sin(f32 x);
+    f64 sin(f64 x);
+
+    f32 cos(f32 x);
+    f64 cos(f64 x);
 
     template <typename T>
     constexpr T minInt();

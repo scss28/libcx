@@ -18,7 +18,7 @@ namespace cx {
         return page;
     }
 
-    Arena::Arena() : Arena(mem::cAllocator) {}
+    Arena::Arena() : Arena(mem::gpa) {}
     Arena::Arena(usize capacity) : Arena() {
         page = allocateNewPage(nullptr, parentAllocator, capacity);
     }
