@@ -3,16 +3,53 @@
 #include "cx/slice.h"
 #include "cx/assert.h"
 
+#ifdef _MSC_VER
+#include <memory.h>
+#endif
+
 namespace cx::mem {
+    /// Converts a pointer of any type to a slice of bytes.
+    template <typename T>
+    __forceinline Slice<u8> asBytes(T* ptr) {
+        return { (u8*)ptr, sizeof(T) };
+    }
+
     /// Copies memory from `src` to `dst`.
     /// Asserts that the lengths match.
     template <typename T>
     void copy(Slice<T> dst, Slice<const T> src) {
         ASSERT(src.len == dst.len);
-#if defined(_MSC_VER) && !defined(__clang__) // MSVC
+#ifdef _MSC_VER
         memcpy(dst.ptr, src.ptr, dst.len * sizeof(T));
 #else // GCC, Clang
         __builtin_memcpy(dst.ptr, src.ptr, dst.len * sizeof(T));
+#endif
+    }
+
+    /// Returns the memory of `value` as a different type. 
+    template <typename T, typename F>
+    T bitCast(F from) {
+        static_assert(sizeof(T) == sizeof(F));
+
+        T out;
+        copy<u8>(asBytes(&out), asBytes(&from));
+
+        return out;
+    }
+
+    /// Sets each element in `dst` to `value`.
+    template <typename T>
+    void set(Slice<T> dst, T value) {
+        for (T* item : dst) *item = value;
+    }
+
+    /// Sets each element in `dst` to `value`.
+    template <typename T>
+    void set(Slice<T> dst, T value) requires (sizeof(T) == sizeof(int)) {
+#ifdef _MSC_VER
+        memset(dst.ptr, bitCast(value), dst.len);
+#else // GCC, Clang
+        __builtin_memset(dst.ptr, bitCast(value), dst.len);
 #endif
     }
 
@@ -30,23 +67,17 @@ namespace cx::mem {
 
     /// Compares elements of `lhs` and `rhs` until the sentinel value.
     /// Useful for comparing null terminated strings.
-    template <typename T, T sentinel = 0>
+    template <typename T, T Sentinel = 0>
     bool eqlSentinel(T const* lhs, T const* rhs) {
         while (true) {
             T l = *lhs;
             T r = *rhs;
             if (l != r) return false;
-            if (l == sentinel) return true;
+            if (l == Sentinel) return true;
 
             lhs += 1;
             rhs += 1;
         }
-    }
-
-    /// Converts a pointer of any type to a slice of bytes.
-    template <typename T>
-    inline Slice<u8> asBytes(T* ptr) {
-        return { ptr, sizeof(T) };
     }
 
     /// Returns true if the alignment is 2^x and greater than 0.
@@ -57,7 +88,7 @@ namespace cx::mem {
     /// Returns the nearest smaller than `ptr` pointer with specified `alignment`.
     /// Asserts that the alignment is valid.
     template <typename T>
-    inline T* alignBackward(T* ptr, usize alignment) {
+    T* alignBackward(T* ptr, usize alignment) {
         ASSERT(isValidAlignment(alignment));
         return (T*)((usize)ptr & ~(alignment - 1));
     }
@@ -65,22 +96,16 @@ namespace cx::mem {
     /// Returns the nearest bigger than `ptr` pointer with specified `alignment`.
     /// Asserts that the alignment is valid.
     template <typename T>
-    inline T* alignForward(T* ptr, usize alignment) {
+    __forceinline T* alignForward(T* ptr, usize alignment) {
         return alignBackward(ptr + (alignment - 1), alignment);
     }
 
-    /// Returns the memory of `value` as a different type. 
-    template <typename T, typename U>
-    T bitCast(U value) {
-        static_assert(sizeof(T) == sizeof(U));
+    template <typename T, T Sentinel = 0>
+    Slice<T> sliceTo(T* ptr) {
+        T* end = ptr;
+        while (*end != Sentinel) end += 1;
 
-        T out;
-#if defined(_MSC_VER) && !defined(__clang__) // MSVC
-        memcpy(&out, &value, sizeof(T));
-#else // GCC, Clang
-        __builtin_memcpy(&out, &value, sizeof(T));
-#endif
-
-        return out;
+        usize len = end - ptr;
+        return {ptr, len};
     }
 }

@@ -11,35 +11,26 @@ namespace cx {
 
         Slice() : ptr(nullptr), len(0) {}
         Slice(T* ptr, usize len) : ptr(ptr), len(len) {}
-        Slice(u8 const* cstring) : ptr(cstring) {
-            u8 const* end = ptr;
-            while (*end != 0) end += 1;
-
-            len = end - ptr;
-        }
 
         template <typename U>
-        Slice(Slice<U> slice) : ptr(slice.ptr) {
-            // Shouldnt be possible to go from lower to higher alignment,
-            // 'from' alignment needs to be divisible by the 'to' alignment.
-            // u16 -> u8 | u8 -x> u16
-            static_assert(
-                alignof(T) > alignof(U)
-                && alignof(U) % alignof(T) == 0 
-            );
-            ASSERT((slice.len * sizeof(U)) % sizeof(T) == 0);
-            len = slice.len * sizeof(U) / sizeof(T);
-        }
+        Slice(Slice<U> slice) : ptr(slice.ptr), len(slice.len) {}
 
-        inline T& operator[](usize index) const {
+        template <usize N>
+        Slice(T (&arr)[N]) : ptr(arr), len(N) {}
+
+        T& operator[](usize index) const {
             ASSERT(index < len);
             return ptr[index];
         }
 
-        inline Slice<T> operator[](usize start, usize end) const {
-            ASSERT(end >= start);
+        Slice<T> from(usize start) const {
+            ASSERT(start < len);
+            return { ptr + start, len - start };
+        }
+
+        Slice<T> to(usize end) const {
             ASSERT(end <= len);
-            return { ptr + start, end - start };
+            return { ptr, len - (len - end) };
         }
 
         T* begin() const {

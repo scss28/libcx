@@ -4,7 +4,7 @@
 
 #include "cx/nums.h"
 #include "cx/defer.h"
-#include "cx/array.h"
+#include "cx/arr.h"
 
 namespace cx {
 //     void printStackTrace() {

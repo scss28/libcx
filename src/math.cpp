@@ -3,13 +3,25 @@
 #if defined(__GNUC__) || defined (__clang__)
 #define SIN32(x) __builtin_sinf(x)
 #define SIN64(x) __builtin_sin(x)
-#else
+#define SQRT32(x) __builtin_sqrtf(x)
+#define SQRT64(x) __builtin_sqrt(x)
+#else // MSVC
 #include <math.h>
 #define SIN32(x) ::sinf(x)
 #define SIN64(x) ::sin(x)
+#define SQRT32(x) ::sqrtf(x)
+#define SQRT64(x) ::sqrt(x)
 #endif
 
 namespace cx::math {
+    f32 sqrt(f32 x) {
+        return SQRT32(x);
+    }
+
+    f64 sqrt(f64 x) {
+        return SQRT64(x);
+    }
+
     f32 sin(f32 x) {
         return SIN32(x);
     }
@@ -127,4 +139,24 @@ namespace cx::math {
         return (i128)maxInt<u128>() << 127;
     }
 #endif
+
+    template <>
+    constexpr f32 zero() {
+        return 0.0f;
+    }
+
+    template <>
+    constexpr f64 zero() {
+        return 0.0;
+    }
+
+    template <>
+    constexpr f32 one() {
+        return 1.0f;
+    }
+
+    template <>
+    constexpr f64 one() {
+        return 1.0;
+    }
 }

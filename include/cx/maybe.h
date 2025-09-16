@@ -8,17 +8,13 @@ namespace cx {
         Maybe(T value) : _hasValue(true), _value(value) {}
         Maybe(decltype(nullptr)) : _hasValue(false) {}
 
-        inline bool hasValue() {
-            return _hasValue;
-        }
-
         T unwrap() const {
-            ASSERT(hasValue());
+            ASSERT(this != nullptr);
             return _value;
         }
 
-        void assertNull() const {
-            ASSERT(!hasValue());
+        bool operator==(decltype(nullptr)) const {
+            return !_hasValue;
         }
 
     private:
@@ -31,20 +27,21 @@ namespace cx {
         Maybe(T* value) : _value(value) {}
         Maybe(decltype(nullptr)) : _value(nullptr) {}
 
-        inline bool hasValue() {
-            return _value != nullptr;
-        }
-
         T* unwrap() const {
-            ASSERT(hasValue());
+            ASSERT(this != nullptr);
             return _value;
         }
 
-        void assertNull() const {
-            ASSERT(!hasValue());
+        bool operator==(decltype(nullptr)) const {
+            return _value == nullptr;
         }
 
     private:
         T* _value;
     };
+
+    template <typename T>
+    bool operator==(decltype(nullptr), Maybe<T> maybe) {
+        return maybe == nullptr;
+    }
 }

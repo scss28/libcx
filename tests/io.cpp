@@ -8,5 +8,5 @@
 namespace io = cx::io;
 
 TEST_CASE("Printing to stdout", "[io]") {
-    REQUIRE(!io::stdout().writeAll("hello\n").hasValue());
+    REQUIRE(io::stdout().writeAll("hello\n") == nullptr);
 }
