@@ -5,13 +5,20 @@
 
 namespace cx::arr {
     template <typename T, usize N>
-    __forceinline usize len(T arr[N]) {
+    __forceinline usize len(T (&arr)[N]) {
         (void)arr;
         return N;
     }
 
+    /// Slices the array from `start` to the array length.
     template <typename T, usize N>
-    Slice<T> toSlice(T arr[N]) {
-        return {arr, N};
+    Slice<T> from(T (&arr)[N], usize start) {
+        return Slice(arr).from(start);
+    }
+
+    /// Slices the array up to `end`.
+    template <typename T, usize N>
+    Slice<T> to(T (&arr)[N], usize end) {
+        return Slice(arr).to(end);
     }
 }

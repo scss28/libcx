@@ -1,7 +1,7 @@
 #include "cx/io/file.h"
 
 namespace cx::io {
-    Maybe<File::WriteError> File::writeAll(const Slice<const u8> bytes) const {
+    [[nodiscard]] Maybe<File::WriteError> File::writeAll(const Slice<const u8> bytes) const {
         auto slice = bytes;
         while (slice.len > 0) {
             auto result = write(slice);

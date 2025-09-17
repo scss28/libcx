@@ -1,10 +1,19 @@
+#pragma once
+
 #include "cx/nums.h"
+#include "cx/slice.h"
 
 namespace cx {
-    /// Exits the program with the specified error code.
-    [[noreturn]] void exit(i32 code);
+    template <typename T>
+    struct Slice;
 
-    /// Writes the stack trace to stderr and exits the program.
+    /// Exits the program with the specified error code.
+    [[noreturn]] void exit(u32 code);
+
+    /// Prints the message and exits abnormally (usually prints a stack trace).
+    [[noreturn]] void panic(Slice<u8> msg);
+
+    /// Causes the program to exit abnormally (usually prints a stack trace).
     [[noreturn]] void panic();
 
     /// In debug mode, this will panic.

@@ -1,5 +1,5 @@
 #include "cx/program.h"
-#include <stdlib.h> // @libc
+#include "cx/io.h"
 
 #ifdef _WIN32
 #include "windows/program.cpp"
@@ -8,24 +8,24 @@
 #endif
 
 namespace cx {
-    [[noreturn]] void exit(i32 code) {
-        ::exit(code);
+    [[noreturn]] void panic() {
+#if defined(_MSC_VER) && !defined(__clang__) // MSVC
+        __debugbreak();
+#else // GCC, Clang
+        __builtin_unreachable();
+#endif
     }
 
-    [[noreturn]] void panic() {
-        // printStackTrace();
-        exit(1);
+    [[noreturn]] void panic(Slice<u8> msg) {
+        (void)io::stderr().writeAll(msg);
+        panic();
     }
 
     [[noreturn]] void unreachable() {
-#if defined(_DEBUG) || defined(NDEBUG)
-        panic();
-#else
 #if defined(_MSC_VER) && !defined(__clang__) // MSVC
         __assume(false);
 #else // GCC, Clang
         __builtin_unreachable();
 #endif
-#endif 
     }
 }

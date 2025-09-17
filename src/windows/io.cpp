@@ -23,9 +23,4 @@ namespace cx::io {
             mem::bitCast<File::Handle>(windows::peb()->ProcessParameters->hStdError);
         return { .handle = handle };
     }
-
-    Either<File, File::OpenError> Dir::openFile(Slice<const u8> path) {
-        (void)path;
-        panic();
-    }
 }
