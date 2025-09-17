@@ -8,3 +8,6 @@ build/
 # clangd
 compile_commands.json
 .cache/
+
+# Doxygen
+docs/

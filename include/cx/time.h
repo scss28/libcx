@@ -1,4 +1,5 @@
 #pragma once
+
 #include "cx/nums.h"
 
 namespace cx::time {

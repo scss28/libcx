@@ -3,6 +3,7 @@
 #include "cx/assert.h"
 
 namespace cx {
+    /// Encapsulates a type which may or may not have a value.
     template <typename T>
     struct Maybe {
         Maybe(T value) : _hasValue(true), _value(value) {}

@@ -1,3 +1,5 @@
+#pragma once
+
 template <typename Fn>
 struct DeferFinalizer {
     Fn fn;

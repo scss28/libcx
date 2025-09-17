@@ -1,48 +1,98 @@
 # libcx
-Minimalistic template library for C++ with no dependencies. It's meant to be used as a replacement for the STL (mainly for myself).
+Minimalistic template library for C++, meant to be used as a replacement for the STL. Takes inspiration from standard libraries of modern low-level languages such as Zig or Rust.
 
-## Features
-#### Slices
-`cx::Slice` represents a readonly view into a "slice" of memory, on the inside it's just a pointer and length. A lot of functions in the library deal with this struct. 
-#### Arrays and lists
-- **Array**
-    ```C++
-    #include <cx/array.h>
+## Getting started
+### build.zig <sub>(recommended)</sub>
 
-    // Very similar to std::array from STL, owns the memory and has static size.
-    auto arr = cx::arr<u32>(1, 2);
-    ```
-- **ArrayList**
-    ```C++
-    #include <cx/array_list.h>
-    #include <cx/log.h>
+#### Prerequisites
+- Zig (0.15.1)
 
-    namespace log = cx::log;
+#### Building
+```
+zig build
+```
+> **Tip:** Run `zig build --help` to see available options.
 
-    cx::ArrayList<i32> list;
-    list.push(1);
-    list.push(2);
+#### Testing
+```
+zig build test
+```
 
-    // 'items' is the current 'std::Slice' of pushed items.
-    for (auto x : list.items) {
-        log::print("%d\n", x);
-    }
-    ```
+#### Using the library in your project
+First make a folder, create a `build.zig` inside and paste-in the code below:
+```
+const std = @import("std");
 
-#### Allocators
-`cx::mem::Allocator` in the beginning was meant to be a normal C++ interface with pure virtual functions however since the library doesn't link `libcpp` the current `cx::mem::Allocator` is a C-style vtable struct.
-- **cAllocator** (global) \
-    Its the default allocator used when using `cx::mem::alloc`, `cx::mem::realloc` and `cx::mem::free`. It's meant for general use like `malloc`/`free`.
-- **Arena**
-    ```C++
-    #include <cx/arena.h>
-    
-    cx::Arena arena;
+pub fn build(b: *std.Build) void {
+    const target = b.standardTargetOptions(.{});
+    const optimize = b.standardOptimizeOption(.{});
 
-    // Allocates a slice of 20 bytes. 
-    // No need to free it as the arena frees all the owned memory in 'deinit'.
-    auto buf = arena.allocator().alloc<u8>(20);
+    const exe_mod = b.createModule(.{
+        .target = target,
+        .optimize = optimize,
+    });
 
-    arena.deinit();
-    ```
+    exe_mod.addCSourceFiles(.{
+        .root = b.path("src"),
+        // Add new C++ files here.   <------------- IMPORTANT
+        .files = &.{
+            "main.cpp",
+        },
+        .flags = &.{"-std=c++23"},
+    });
 
+    const libcx = b.dependency("libcx", .{ .target = target, .optimize = optimize });
+    exe_mod.linkLibrary(libcx.artifact("libcx"));
+
+    const exe = b.addExecutable(.{
+        .name = "a_very_amazing_application",
+        .root_module = exe_mod,
+    });
+
+    b.installArtifact(exe);
+
+    const run_cmd = b.addRunArtifact(exe);
+    run_cmd.step.dependOn(b.getInstallStep());
+
+    const run_step = b.step("run", "Run the application");
+    run_step.dependOn(&run_cmd.step);
+}
+```
+
+Then run `zig fetch --save git+https://github.com/scss28/libcx` to get the library.
+> *This should also create `build.zig.zon` which contains project specific information.*
+
+Once the library gets fetched, create a `src/main.cpp` file and you're done! \
+Use `zig build` to build and `zig build run` to run.
+
+### CMake
+> ⚠️ **Warning:** This option is not actively updated and may stop working at any point in time.
+
+#### Prerequisites
+- C++ (version 23) compiler.
+- CMake
+
+#### Building
+Generate the project files:
+```
+mkdir build
+cd build
+cmake ..
+```
+Then `cmake build .`
+
+## Documentation
+Currently the documentation may only be generated using `doxygen`.
+
+## TODO
+
+### cx
+- [ ] Stack traces for cx::panic (include/cx/program.h).
+
+### cx::io
+- [ ] Format printing to files. 
+    - [ ] cx::fmt namespace providing formatting integers, floats etc.
+    - [ ] Writer struct?
+
+### cx::math
+- [ ] math::Matrix implementation.
