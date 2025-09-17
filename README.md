@@ -20,7 +20,7 @@ zig build test
 
 #### Using the library in your project
 First make a folder, create a `build.zig` inside and paste-in the code below:
-```
+```Rust
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
