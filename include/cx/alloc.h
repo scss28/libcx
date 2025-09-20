@@ -25,6 +25,19 @@ namespace cx::mem {
         }
 
         template <typename T>
+        __forceinline T* create() {
+            return alloc<T>(1).ptr;
+        }
+
+        template <typename T>
+        T* create(T value) {
+            auto ptr = create<T>();
+            *ptr = value;
+
+            return ptr;
+        }
+
+        template <typename T>
         Slice<T> realloc(
             Slice<T> slice,
             usize newLen,
@@ -46,6 +59,7 @@ namespace cx::mem {
         }
     };
 
+    /// General purpose allocator, used by default in data structures (wraps malloc).
     extern Allocator gpa;
 
     template <typename T>

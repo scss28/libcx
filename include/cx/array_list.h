@@ -3,7 +3,6 @@
 #include "cx/slice.h"
 #include "cx/alloc.h"
 #include "cx/defer.h"
-#include "cx/mem.h"
 
 namespace cx {
     template <typename T>
@@ -39,7 +38,7 @@ namespace cx {
             resize(newCapacity, allocator);
         }
 
-        inline void ensureUnusedCapacity(
+        __forceinline void ensureUnusedCapacity(
             usize atLeast, 
             mem::Allocator allocator = mem::gpa
         ) {
@@ -70,7 +69,7 @@ namespace cx {
             return items[items.len - 1];
         }
 
-        inline void clear() {
+        __forceinline void clear() {
             items.len = 0;
         }
     };

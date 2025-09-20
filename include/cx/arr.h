@@ -5,8 +5,7 @@
 
 namespace cx::arr {
     template <typename T, usize N>
-    __forceinline usize len(T (&arr)[N]) {
-        (void)arr;
+    constexpr usize len(T (&)[N]) {
         return N;
     }
 

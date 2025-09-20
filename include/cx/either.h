@@ -10,19 +10,37 @@ namespace cx {
         Either(L left) : _tag(Tag::Left), _left(left) {}
         Either(R right) : _tag(Tag::Right), _right(right) {}
 
+        __forceinline bool isLeft() const {
+            return _tag == Tag::Left;
+        }
+
+        __forceinline bool isRight() const {
+            return _tag == Tag::Right;
+        }
+        
         template <typename T>
         bool is() const;
 
         template <>
         bool is<L>() const {
-            return _tag == Tag::Left;
+            return isLeft();
         }
 
         template <>
         bool is<R>() const {
-            return _tag == Tag::Right;
+            return isRight();
         }
-        
+
+        L unwrapLeft() const {
+            assert(isLeft());
+            return _left;
+        }
+
+        R unwrapRight() const {
+            assert(isRight());
+            return _right;
+        }
+
         template <typename T>
         T unwrap() const;
 
@@ -64,3 +82,9 @@ namespace cx {
         };
     };
 }
+
+#define TRY(expr)                                \
+    if (auto either = (expr); either.isRight())  \
+        return either.unwrapRight();             \
+    else                                         \
+        either.unwrapLeft();
